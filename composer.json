@@ -6,6 +6,6 @@
         {"name": "Alex Sharov", "email": "www.pismeco@gmail.com"}
     ],
     "autoload": {
-        "psr-0": { "nizsheanez\\JsonRpc": "" }
+        "psr-0": { "nizsheanez": "src" }
     }
 }
