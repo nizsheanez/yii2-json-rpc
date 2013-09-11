@@ -12,7 +12,7 @@ use yii\web\HttpException;
  */
 class Action extends \yii\base\Action
 {
-    public function actionIndex()
+    public function run()
     {
         $this->failIfNotAJsonRpcRequest();
         Yii::beginProfile('service.request');
