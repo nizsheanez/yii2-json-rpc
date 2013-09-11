@@ -1,5 +1,5 @@
 {
-    "name": "nizsheanez/JsonRpc",
+    "name": "nizsheanez/yii2-json-rpc",
     "description": "A lightweight JsonRpc Server and Client for PHP",
     "type": "library",
     "authors": [
