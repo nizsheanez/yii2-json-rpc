@@ -35,20 +35,7 @@ abstract class Client {
             )
         ));
 
-        $jsonResponse = '';
-        try {
-            $fp = fopen($this->url, 'r', false, $ctx);
-            while ($line = fgets($fp))
-            {
-                $jsonResponse .= trim($line) . "\n";
-            }
-            fclose($fp);
-        } catch (Exception $e) {
-            if (isset($fp) && $fp !== false) {
-                fclose($fp);
-                throw $e;
-            }
-        }
+        $jsonResponse = file_get_contents($this->url, false, $ctx);
 
         if ($jsonResponse === '')
             throw new Exception('fopen failed', Exception::INTERNAL_ERROR);
