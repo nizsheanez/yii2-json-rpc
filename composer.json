@@ -3,6 +3,7 @@
     "description": "A lightweight JsonRpc Server and Client for PHP",
     "type": "library",
     "license": "BSD-3-Clause",
+    "keywords": ["yii", "yii2", "json", "rpc", "jsonrpc"],
     "authors": [
         {"name": "Alex Sharov", "email": "www.pismeco@gmail.com"}
     ],
