@@ -1,5 +1,5 @@
 <?
-namespace nizsheanez\JsonRpc;
+namespace nizsheanez\jsonRpc;
 
 use Yii;
 use ReflectionClass;

@@ -1,5 +1,5 @@
 <?php
-namespace nizsheanez\JsonRpc;
+namespace nizsheanez\jsonRpc;
 
 /**
  * @author sergey.yusupov, alex.sharov
