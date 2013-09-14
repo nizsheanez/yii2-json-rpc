@@ -16,49 +16,57 @@ class Action extends \yii\base\Action
     {
         $this->failIfNotAJsonRpcRequest();
         Yii::beginProfile('service.request');
-        $request = $result = null;
+        $request = $output = null;
         try {
-            $request = json_decode(file_get_contents('php://input'), true);
-            $this->failIfRequestIsInvalid($request);
+            $request = $this->getRequest();
             try {
-                $class = new ReflectionClass($this->controller);
-
-                if (!$class->hasMethod($request['method']))
-                    throw new Exception("Method not found", -32601);
-
-                $method = $class->getMethod($request['method']);
-
-                ob_start();
-
-                Yii::beginProfile('service.request.action');
-                $result = $method->invokeArgs($this->controller, isset($request['params'])? $request['params'] : null);
-                Yii::endProfile('service.request.action');
-
-                $output = ob_get_clean();
-                if ($output) Yii::info($output, 'service.output');
-
+                $output = $this->tryToRunMethod($request);
             } catch (Exception $e) {
                 Yii::error($e, 'service.error');
-                throw new Exception($e->getMessage(), -32603);
+                throw new Exception($e->getMessage(), Exception::INTERNAL_ERROR);
             }
 
-            if (!empty($request['id'])) {
-                echo json_encode(array(
-                    'jsonrpc' => '2.0',
-                    'id' => $request['id'],
-                    'result' => $output,
-                ));
-            }
+            $this->answer($request, $output);
         } catch (Exception $e) {
-            echo json_encode(array(
-                'jsonrpc' => '2.0',
-                'id' => isset($request['id'])? $request['id'] : null,
-                'error' => $e->getErrorAsArray(),
-            ));
+            $this->answer($request, $output, $e);
         }
         Yii::endProfile('service.request');
     }
 
+    protected function answer($request, $output = null, $exception = null)
+    {
+        $answer = array(
+            'jsonrpc' => '2.0',
+            'id' => isset($request['id'])? $request['id'] : null,
+        );
+        if ($error) {
+            $answer['error'] = $e->getErrorAsArray();
+        }
+        if ($output) {
+            $answer['result'] = $output;
+        }
+        echo json_encode();
+    }
+
+    protected function tryToRunMethod($request)
+    {
+        $class = new ReflectionClass($this->controller);
+        $method = $class->getMethod($request['method']);
+
+        ob_start();
+
+        Yii::beginProfile('service.request.action');
+        $result = $method->invokeArgs($this->controller, isset($request['params'])? $request['params'] : null);
+        Yii::endProfile('service.request.action');
+
+        $output = ob_get_clean();
+        if ($output) Yii::info($output, 'service.output');
+
+        if (!$class->hasMethod($request['method']))
+            throw new Exception("Method not found", Exception::METHOD_NOT_FOUND);
+
+        return $output;
+    }
     private function failIfNotAJsonRpcRequest()
     {
         if (Yii::$app->request->requestType != 'POST'
@@ -71,13 +79,15 @@ class Action extends \yii\base\Action
      * @param $request
      * @throws Exception
      */
-    private function failIfRequestIsInvalid($request)
+    private function getRequest()
     {
+        $request = json_decode(file_get_contents('php://input'), true);
+
         if ($request === null
             || !isset($request['jsonrpc'])
             || $request['jsonrpc'] != '2.0'
             || !isset($request['method'])
-        ) throw new Exception("Invalid Request", -32600);
+        ) throw new Exception("Invalid Request", Exception::INVALID_REQUEST);
     }
 
 }
