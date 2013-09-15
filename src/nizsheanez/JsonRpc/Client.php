@@ -6,7 +6,7 @@ use nizsheanez\JsonRpc\Exception;
 /**
  * @author sergey.yusupov, alex.sharov
  */
-abstract class Client {
+class Client {
 
     protected $url;
 
