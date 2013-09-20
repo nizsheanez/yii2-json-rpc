@@ -39,13 +39,13 @@ class Action extends \yii\base\Action
             'jsonrpc' => '2.0',
             'id' => isset($request['id'])? $request['id'] : null,
         );
-        if ($error) {
-            $answer['error'] = $e->getErrorAsArray();
+        if ($exception) {
+            $answer['error'] = $exception->getErrorAsArray();
         }
         if ($output) {
             $answer['result'] = $output;
         }
-        echo json_encode();
+        echo json_encode($answer);
     }
 
     protected function tryToRunMethod($request)
