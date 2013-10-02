@@ -12,32 +12,38 @@ use yii\web\HttpException;
  */
 class Action extends \yii\base\Action
 {
+    protected $request;
+
     public function run()
     {
         $this->failIfNotAJsonRpcRequest();
         Yii::beginProfile('service.request');
-        $request = $output = null;
+        $this->request = $output = null;
         try {
-            $request = $this->getRequest();
+            $this->request = $this->getRequest();
             try {
-                $output = $this->tryToRunMethod($request);
+                $output = $this->tryToRunMethod();
             } catch (Exception $e) {
                 Yii::error($e, 'service.error');
                 throw new Exception($e->getMessage(), Exception::INTERNAL_ERROR);
             }
 
-            $this->answer($request, $output);
+            $this->answer($output);
         } catch (Exception $e) {
-            $this->answer($request, $output, $e);
+            $this->answer($output, $e);
         }
         Yii::endProfile('service.request');
     }
 
-    protected function answer($request, $output = null, $exception = null)
+    /**
+     * @param null $output
+     * @param null $exception
+     */
+    protected function answer($output = null, $exception = null)
     {
         $answer = array(
             'jsonrpc' => '2.0',
-            'id' => isset($request['id'])? $request['id'] : null,
+            'id' => isset($this->request['id'])? $this->request['id'] : null,
         );
         if ($exception) {
             $answer['error'] = $exception->getErrorAsArray();
@@ -48,26 +54,47 @@ class Action extends \yii\base\Action
         echo json_encode($answer);
     }
 
-    protected function tryToRunMethod($request)
+    /**
+     * @return string|callable|\ReflectionMethod
+     */
+    protected function getHandler()
     {
         $class = new ReflectionClass($this->controller);
-        $method = $class->getMethod($request['method']);
+        $method = $class->getMethod($this->request['method']);
+
+        return $method;
+    }
+
+    /**
+     * @param string|callable|\ReflectionMethod $method
+     * @param array $params
+     * @return mixed
+     */
+    protected function runMethod($method, $params)
+    {
+        return $method->invokeArgs($this->controller, $params);
+    }
+
+    protected function tryToRunMethod()
+    {
+        $method = $this->getHandler();
 
         ob_start();
 
         Yii::beginProfile('service.request.action');
-        $result = $method->invokeArgs($this->controller, isset($request['params'])? $request['params'] : null);
+        $result = $this->runMethod($method, isset($this->request['params']) ? $this->request['params'] : null);
         Yii::endProfile('service.request.action');
 
         $output = ob_get_clean();
         if ($output) Yii::info($output, 'service.output');
 
-        if (!$class->hasMethod($request['method']))
+        if (!$class->hasMethod($this->request['method']))
             throw new Exception("Method not found", Exception::METHOD_NOT_FOUND);
 
         return $output;
     }
-    private function failIfNotAJsonRpcRequest()
+
+    protected function failIfNotAJsonRpcRequest()
     {
         if (Yii::$app->request->requestType != 'POST'
             || empty($_SERVER['CONTENT_TYPE'])
@@ -76,18 +103,22 @@ class Action extends \yii\base\Action
     }
 
     /**
-     * @param $request
      * @throws Exception
      */
-    private function getRequest()
+    protected function getRequest()
     {
         $request = json_decode(file_get_contents('php://input'), true);
 
-        if ($request === null
-            || !isset($request['jsonrpc'])
-            || $request['jsonrpc'] != '2.0'
-            || !isset($request['method'])
-        ) throw new Exception("Invalid Request", Exception::INVALID_REQUEST);
+        if (!$this->isValidRequest($request)) {
+            throw new Exception("Invalid Request", Exception::INVALID_REQUEST);
+        }
+
+        return $request;
+    }
+
+    protected function isValidRequest($request)
+    {
+        return isset($request['jsonrpc']) && $request['jsonrpc'] == '2.0' && isset($request['method']);
     }
 
 }
