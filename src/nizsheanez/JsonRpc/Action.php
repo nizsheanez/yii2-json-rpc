@@ -12,7 +12,10 @@ use yii\web\HttpException;
  */
 class Action extends \yii\base\Action
 {
-    protected $request;
+    /**
+     * @var \common\components\Protocol
+     */
+    protected $protocol;
 
     public function run()
     {
@@ -20,7 +23,7 @@ class Action extends \yii\base\Action
         Yii::beginProfile('service.request');
         $this->request = $output = null;
         try {
-            $this->request = $this->getRequest();
+            $this->protocol = new \common\components\Protocol(file_get_contents('php://input'));
             try {
                 $output = $this->tryToRunMethod();
             } catch (Exception $e) {
@@ -28,31 +31,13 @@ class Action extends \yii\base\Action
                 throw new Exception($e->getMessage(), Exception::INTERNAL_ERROR);
             }
 
-            $this->answer($output);
+            echo $this->protocol->answer($output);
         } catch (Exception $e) {
-            $this->answer($output, $e);
+            echo $this->protocol->answer($output, $e);
         }
         Yii::endProfile('service.request');
     }
 
-    /**
-     * @param null $output
-     * @param null $exception
-     */
-    protected function answer($output = null, $exception = null)
-    {
-        $answer = array(
-            'jsonrpc' => '2.0',
-            'id' => isset($this->request['id'])? $this->request['id'] : null,
-        );
-        if ($exception) {
-            $answer['error'] = $exception->getErrorAsArray();
-        }
-        if ($output) {
-            $answer['result'] = $output;
-        }
-        echo json_encode($answer);
-    }
 
     /**
      * @return string|callable|\ReflectionMethod
@@ -60,7 +45,11 @@ class Action extends \yii\base\Action
     protected function getHandler()
     {
         $class = new ReflectionClass($this->controller);
-        $method = $class->getMethod($this->request['method']);
+
+        if (!$class->hasMethod($this->protocol->getMethod()))
+            throw new Exception("Method not found", Exception::METHOD_NOT_FOUND);
+
+        $method = $class->getMethod($this->protocol->getMethod());
 
         return $method;
     }
@@ -82,43 +71,23 @@ class Action extends \yii\base\Action
         ob_start();
 
         Yii::beginProfile('service.request.action');
-        $result = $this->runMethod($method, isset($this->request['params']) ? $this->request['params'] : null);
+        $this->runMethod($method, $this->protocol->getParams());
         Yii::endProfile('service.request.action');
 
         $output = ob_get_clean();
-        if ($output) Yii::info($output, 'service.output');
-
-        if (!$class->hasMethod($this->request['method']))
-            throw new Exception("Method not found", Exception::METHOD_NOT_FOUND);
+        if ($output) {
+            Yii::info($output, 'service.output');
+        }
 
         return $output;
     }
 
     protected function failIfNotAJsonRpcRequest()
     {
-        if (Yii::$app->request->requestType != 'POST'
-            || empty($_SERVER['CONTENT_TYPE'])
-            || $_SERVER['CONTENT_TYPE'] != "application/json-rpc"
-        ) throw new HttpException(404, "Page not found");
-    }
-
-    /**
-     * @throws Exception
-     */
-    protected function getRequest()
-    {
-        $request = json_decode(file_get_contents('php://input'), true);
-
-        if (!$this->isValidRequest($request)) {
-            throw new Exception("Invalid Request", Exception::INVALID_REQUEST);
+        if (Yii::$app->request->requestType != 'POST' || \common\components\Protocol::checkContentType()) {
+            throw new HttpException(404, "Page not found");
         }
-
-        return $request;
     }
 
-    protected function isValidRequest($request)
-    {
-        return isset($request['jsonrpc']) && $request['jsonrpc'] == '2.0' && isset($request['method']);
-    }
 
 }
