@@ -16,24 +16,7 @@ class Client
 
     public function __call($name, $arguments)
     {
-        $id = md5(microtime());
-        $request = [
-            'jsonrpc' => '2.0',
-            'method' => $name,
-            'params' => $arguments,
-            'id' => $id
-        ];
-
-        $jsonRequest = json_encode($request);
-
-        $ctx = stream_context_create([
-            'http' => [
-                'method' => 'POST',
-                'header' => "Content-Type: " . Protocol::MIME . "\r\n",
-                'content' => $jsonRequest
-            ]
-        ]);
-
+        $ctx = Protocol::client($name, $arguments)->getHttpStreamContext();
         $jsonResponse = file_get_contents($this->url, false, $ctx);
 
         if ($jsonResponse === '') {

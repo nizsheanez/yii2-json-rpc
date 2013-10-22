@@ -15,13 +15,37 @@ class Protocol extends \yii\base\Object
     protected $message;
     protected $request;
 
-    public function __construct($message) {
-        $this->message = $message;
-        $this->request = json_decode($message, true);
+    public static function client($method, $params)
+    {
+        $protocol = new static;
+        $protocol->request = $protocol->createClientRequest($method, $params);
+        return $protocol;
+    }
 
-        if (!static::isValidRequest($this->request)) {
+    public static function server($message)
+    {
+        $protocol = new static;
+        $protocol->message = $message;
+        $protocol->request = json_decode($message, true);
+        if (!static::isValidRequest($protocol->request)) {
             throw new Exception("Invalid Request", Protocol::INVALID_REQUEST);
         }
+        return $protocol;
+    }
+
+    public function getHttpStreamContext()
+    {
+        $jsonRequest = json_encode($this->request);
+
+        $ctx = stream_context_create([
+            'http' => [
+                'method' => 'POST',
+                'header' => "Content-Type: " . Protocol::MIME . "\r\n",
+                'content' => $jsonRequest
+            ]
+        ]);
+
+        return $ctx;
     }
 
     public function getMethod()
@@ -66,6 +90,17 @@ class Protocol extends \yii\base\Object
             $answer['result'] = $output;
         }
         return json_encode($answer);
+    }
+
+    public function createClientRequest($menthod, $params) {
+        $id = md5(microtime());
+        $request = [
+            'jsonrpc' => '2.0',
+            'method' => $menthod,
+            'params' => $params,
+            'id' => $id
+        ];
+        return $request;
     }
 
 }
