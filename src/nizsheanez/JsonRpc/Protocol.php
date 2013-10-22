@@ -20,7 +20,7 @@ class Protocol extends \yii\base\Object
         $this->request = json_decode($message, true);
 
         if (!static::isValidRequest($this->request)) {
-            throw new Exception("Invalid Request", Exception::INVALID_REQUEST);
+            throw new Exception("Invalid Request", Protocol::INVALID_REQUEST);
         }
     }
 

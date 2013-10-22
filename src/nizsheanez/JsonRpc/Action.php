@@ -3,7 +3,6 @@ namespace nizsheanez\jsonRpc;
 
 use Yii;
 use ReflectionClass;
-use nizsheanez\JsonRpc\Exception;
 use yii\web\HttpException;
 
 
@@ -13,7 +12,7 @@ use yii\web\HttpException;
 class Action extends \yii\base\Action
 {
     /**
-     * @var \common\components\Protocol
+     * @var Protocol
      */
     protected $protocol;
 
@@ -23,12 +22,12 @@ class Action extends \yii\base\Action
         Yii::beginProfile('service.request');
         $this->request = $output = null;
         try {
-            $this->protocol = new \common\components\Protocol(file_get_contents('php://input'));
+            $this->protocol = new Protocol(file_get_contents('php://input'));
             try {
                 $output = $this->tryToRunMethod();
             } catch (Exception $e) {
                 Yii::error($e, 'service.error');
-                throw new Exception($e->getMessage(), Exception::INTERNAL_ERROR);
+                throw new Exception($e->getMessage(), Protocol::INTERNAL_ERROR);
             }
 
             echo $this->protocol->answer($output);
@@ -47,7 +46,7 @@ class Action extends \yii\base\Action
         $class = new ReflectionClass($this->controller);
 
         if (!$class->hasMethod($this->protocol->getMethod()))
-            throw new Exception("Method not found", Exception::METHOD_NOT_FOUND);
+            throw new Exception("Method not found", Protocol::METHOD_NOT_FOUND);
 
         $method = $class->getMethod($this->protocol->getMethod());
 
@@ -84,7 +83,7 @@ class Action extends \yii\base\Action
 
     protected function failIfNotAJsonRpcRequest()
     {
-        if (Yii::$app->request->requestType != 'POST' || \common\components\Protocol::checkContentType()) {
+        if (Yii::$app->request->requestType != 'POST' || Protocol::checkContentType()) {
             throw new HttpException(404, "Page not found");
         }
     }
