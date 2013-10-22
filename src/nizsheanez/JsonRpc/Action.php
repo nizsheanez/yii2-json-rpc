@@ -22,7 +22,7 @@ class Action extends \yii\base\Action
         Yii::beginProfile('service.request');
         $this->request = $output = null;
         try {
-            $this->protocol = new Protocol(file_get_contents('php://input'));
+            $this->protocol = Protocol::server(file_get_contents('php://input'));
             try {
                 $output = $this->tryToRunMethod();
             } catch (Exception $e) {
