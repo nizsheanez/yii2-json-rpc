@@ -3,6 +3,7 @@ namespace nizsheanez\jsonRpc;
 
 use Yii;
 use ReflectionClass;
+use ReflectionMethod;
 use yii\web\HttpException;
 
 
@@ -39,7 +40,7 @@ class Action extends \yii\base\Action
 
 
     /**
-     * @return string|callable|\ReflectionMethod
+     * @return string|callable|ReflectionMethod
      */
     protected function getHandler()
     {

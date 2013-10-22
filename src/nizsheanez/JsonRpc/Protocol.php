@@ -53,6 +53,11 @@ class Protocol extends \yii\base\Object
         return $this->request['method'];
     }
 
+    public function getRequestId()
+    {
+        return $this->request['id'];
+    }
+
     public static function checkContentType()
     {
         return empty($_SERVER['CONTENT_TYPE']) || $_SERVER['CONTENT_TYPE'] != self::MIME;
