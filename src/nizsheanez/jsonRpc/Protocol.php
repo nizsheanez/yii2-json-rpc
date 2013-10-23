@@ -9,16 +9,15 @@ class Protocol extends \yii\base\Object
     const INVALID_PARAMS = -32602;
     const INTERNAL_ERROR = -32603;
 
-
     const MIME = 'application/json-rpc';
 
     protected $message;
-    protected $request;
+    protected $data;
 
     public static function client($method, $params)
     {
         $protocol = new static;
-        $protocol->request = $protocol->createClientRequest($method, $params);
+        $protocol->data = $protocol->getRequest($method, $params);
         return $protocol;
     }
 
@@ -26,7 +25,7 @@ class Protocol extends \yii\base\Object
     {
         $protocol = new static;
         $protocol->message = $message;
-        $protocol->request = json_decode($message, true);
+        $protocol->data = json_decode($message, true);
         if (!static::isValidRequest($protocol->request)) {
             throw new Exception("Invalid Request", Protocol::INVALID_REQUEST);
         }
@@ -50,12 +49,12 @@ class Protocol extends \yii\base\Object
 
     public function getMethod()
     {
-        return $this->request['method'];
+        return $this->data['method'];
     }
 
     public function getRequestId()
     {
-        return $this->request['id'];
+        return $this->data['id'];
     }
 
     public static function checkContentType()
@@ -63,49 +62,81 @@ class Protocol extends \yii\base\Object
         return empty($_SERVER['CONTENT_TYPE']) || $_SERVER['CONTENT_TYPE'] != self::MIME;
     }
 
-    protected function getRequest()
+    public static function isValidRequest($request)
     {
-        return $this->request;
+        $version = isset($request['jsonrpc']) && $request['jsonrpc'] == '2.0';
+        $method = isset($request['method']);
+        $id = isset($request['id']);
+        return $version && $method && $id;
     }
 
-    protected static function isValidRequest($request)
+    public static function isValidResponse($request)
     {
-        return isset($request['jsonrpc']) && $request['jsonrpc'] == '2.0' && isset($request['method']);
+        $version = isset($request['jsonrpc']) && $request['jsonrpc'] == '2.0';
+        $method = isset($request['method']);
+        $data = isset($request['result']) || isset($request['error']);
+        $additional = true;
+        if (isset($request['error'])) {
+            $additional = isset($request['error']['code'], $request['error']['message']);
+        }
+        return $version && $method && $data && $additional;
     }
 
     public function getParams()
     {
-        return isset($this->request['params']) ? $this->request['params'] : null;
+        return isset($this->data['params']) ? $this->data['params'] : null;
+    }
+
+
+    protected function getRequest($method = null, $params = null)
+    {
+        if (!$this->data) {
+            $this->data = [
+                'jsonrpc' => '2.0',
+                'method' => $menthod,
+                'params' => $params,
+                'id' => $this->newId()
+            ];
+        }
+        return $this->data;
     }
 
     /**
      * @param null $output
      * @param null $exception
      */
-    public function answer($output = null, $exception = null)
+    public function getResponse($output = null, $exception = null)
     {
         $answer = array(
             'jsonrpc' => '2.0',
-            'id' => isset($this->request['id']) ? $this->request['id'] : null,
+            'id' => isset($this->data['id']) ? $this->data['id'] : $this->newId(),
         );
         if ($exception) {
-            $answer['error'] = $exception->getErrorAsArray();
+            if ($exception instanceof Exception) {
+                $answer['error'] = $exception->getErrorAsArray();
+            } else {
+                $answer['error'] = [
+                    'code' => self::INTERNAL_ERROR,
+                    'message' => 'Internal error'
+                ];
+            }
         }
         if ($output) {
             $answer['result'] = $output;
         }
+
+        if (self::isValidResponse($answer)) {
+            $answer['error'] = [
+                'code' => self::INTERNAL_ERROR,
+                'message' => 'Internal error'
+            ];
+        }
+
         return json_encode($answer);
     }
 
-    public function createClientRequest($menthod, $params) {
-        $id = md5(microtime());
-        $request = [
-            'jsonrpc' => '2.0',
-            'method' => $menthod,
-            'params' => $params,
-            'id' => $id
-        ];
-        return $request;
+    public function newId()
+    {
+        return md5(microtime());
     }
-
 }
