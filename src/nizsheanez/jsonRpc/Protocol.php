@@ -101,11 +101,22 @@ class Protocol extends \yii\base\Object
         return $this->data;
     }
 
+    public function getMessage($output, $exception = null)
+    {
+        if ($exception) {
+            $data = $this->getResponse($output, $exception);
+        } else {
+            $data = $this->getResponse($output);
+        }
+
+        return json_encode($data);
+    }
+
     /**
      * @param null $output
      * @param null $exception
      */
-    public function getResponse($output = null, $exception = null)
+    public function getResponse($output, $exception = null)
     {
         $answer = array(
             'jsonrpc' => '2.0',
@@ -132,7 +143,7 @@ class Protocol extends \yii\base\Object
             ];
         }
 
-        return json_encode($answer);
+        return $answer;
     }
 
     public function newId()
