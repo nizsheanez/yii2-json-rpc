@@ -12,12 +12,7 @@ use yii\web\HttpException;
  */
 class Action extends \yii\base\Action
 {
-    use \nizsheanez\jsonRpc\TraitServer;
-
-    /**
-     * @var Protocol
-     */
-    protected $protocol;
+    use \nizsheanez\jsonRpc\traits\Serializable;
 
     public function run()
     {
@@ -25,12 +20,12 @@ class Action extends \yii\base\Action
         Yii::beginProfile('service.request');
         $output = null;
         try {
-            $this->message = file_get_contents('php://input');
+            $this->setRequestMessage(file_get_contents('php://input'));
             try {
                 $output = $this->tryToRunMethod();
             } catch (Exception $e) {
                 Yii::error($e, 'service.error');
-                throw new Exception($e->getMessage(), Protocol::INTERNAL_ERROR);
+                throw new Exception($e->getMessage(), Exception::INTERNAL_ERROR);
             }
 
             $this->result = $output;
@@ -50,10 +45,10 @@ class Action extends \yii\base\Action
     {
         $class = new ReflectionClass($this->controller);
 
-        if (!$class->hasMethod($this->protocol->getMethod()))
-            throw new Exception("Method not found", Protocol::METHOD_NOT_FOUND);
+        if (!$class->hasMethod($this->getMethod()))
+            throw new Exception("Method not found", Exception::METHOD_NOT_FOUND);
 
-        $method = $class->getMethod($this->protocol->getMethod());
+        $method = $class->getMethod($this->getMethod());
 
         return $method;
     }
@@ -75,7 +70,7 @@ class Action extends \yii\base\Action
         ob_start();
 
         Yii::beginProfile('service.request.action');
-        $this->runMethod($method, $this->protocol->getParams());
+        $this->runMethod($method, $this->getParams());
         Yii::endProfile('service.request.action');
 
         $output = ob_get_clean();
@@ -88,7 +83,7 @@ class Action extends \yii\base\Action
 
     protected function failIfNotAJsonRpcRequest()
     {
-        if (Yii::$app->request->requestType != 'POST' || Protocol::checkContentType()) {
+        if (Yii::$app->request->requestType != 'POST' || Exception::checkContentType()) {
             throw new HttpException(404, "Page not found");
         }
     }

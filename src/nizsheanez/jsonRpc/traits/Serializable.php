@@ -1,15 +1,17 @@
 <?php
 namespace nizsheanez\jsonRpc\traits;
 
-trait Server {
+trait Serializable
+{
+
+    use Request;
 
     public $exception;
     public $result;
-    public $message;
 
-    public function __serialize()
+    public function toJson()
     {
-        $request = json_decode($this->message, true);
+        $request = json_decode($this->_requestMessage, true);
 
         $answer = array(
             'jsonrpc' => '2.0',
@@ -20,7 +22,7 @@ trait Server {
                 $answer['error'] = $this->exception->getErrorAsArray();
             } else {
                 $answer['error'] = [
-                    'code' => self::INTERNAL_ERROR,
+                    'code' => Exception::INTERNAL_ERROR,
                     'message' => $this->exception
                 ];
             }
@@ -31,7 +33,7 @@ trait Server {
 
         if (self::isValidJsonRpc($answer)) {
             $answer['error'] = [
-                'code' => self::INTERNAL_ERROR,
+                'code' => Exception::INTERNAL_ERROR,
                 'message' => 'Internal error'
             ];
         }
@@ -39,9 +41,9 @@ trait Server {
         return json_encode($answer);
     }
 
-    public function setMessage($message)
+    public function __toString()
     {
-        $this->message = $message;
+        return $this->toJson();
     }
 
     public function isSuccessResponse()
@@ -66,4 +68,8 @@ trait Server {
         return $version && $method && $data && $additional;
     }
 
+    public static function checkContentType()
+    {
+        return empty($_SERVER['CONTENT_TYPE']) || $_SERVER['CONTENT_TYPE'] != 'application/json-rpc';
+    }
 }

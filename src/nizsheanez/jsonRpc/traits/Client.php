@@ -1,17 +1,38 @@
 <?php
 namespace nizsheanez\jsonRpc\traits;
 
-use nizsheanez\jsonRpc\Protocol;
+use nizsheanez\jsonRpc\Exception;
 
 trait Client
 {
-
     public function callServer($method, $params, $url)
     {
         $request = $this->getRequest($method, $params);
         $ctx = $this->getHttpStreamContext($request);
         $jsonResponse = file_get_contents($url, false, $ctx);
-        return $jsonResponse;
+
+
+        if ($jsonResponse === '') {
+            throw new Exception('fopen failed', Exception::INTERNAL_ERROR);
+        }
+
+        $response = json_decode($jsonResponse);
+
+        if ($response === null) {
+            throw new Exception('JSON cannot be decoded', Exception::INTERNAL_ERROR);
+        }
+
+        if ($response->id != $id) {
+            throw new Exception('Mismatched JSON-RPC IDs', Exception::INTERNAL_ERROR);
+        }
+
+        if (property_exists($response, 'error')) {
+            throw new Exception($response->error->message, $response->error->code);
+        } else if (property_exists($response, 'result')) {
+            return $response->result;
+        } else {
+            throw new Exception('Invalid JSON-RPC response', Exception::INTERNAL_ERROR);
+        }
     }
 
     public function getHttpStreamContext($request)
@@ -21,7 +42,7 @@ trait Client
         $ctx = stream_context_create([
             'http' => [
                 'method' => 'POST',
-                'header' => "Content-Type: " . Protocol::MIME . "\r\n",
+                'header' => "Content-Type: " . Exception::MIME . "\r\n",
                 'content' => $jsonRequest
             ]
         ]);
