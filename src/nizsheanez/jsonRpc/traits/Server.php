@@ -39,6 +39,11 @@ trait Server {
         return json_encode($answer);
     }
 
+    public function setMessage($message)
+    {
+        $this->message = $message;
+    }
+
     public function isSuccessResponse()
     {
         return !$this->exception;
