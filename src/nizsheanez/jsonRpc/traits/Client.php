@@ -69,4 +69,10 @@ trait Client
         return isset($this->data['params']) ? $this->data['params'] : null;
     }
 
+
+    public function newId()
+    {
+        return md5(microtime());
+    }
+
 }
