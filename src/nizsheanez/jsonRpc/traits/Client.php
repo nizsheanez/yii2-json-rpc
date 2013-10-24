@@ -1,6 +1,8 @@
 <?php
 namespace nizsheanez\jsonRpc\traits;
 
+use nizsheanez\jsonRpc\Protocol;
+
 trait Client
 {
 
@@ -27,12 +29,6 @@ trait Client
         return $ctx;
     }
 
-
-    public static function checkContentType()
-    {
-        return empty($_SERVER['CONTENT_TYPE']) || $_SERVER['CONTENT_TYPE'] != self::MIME;
-    }
-
     public static function isValidRequest($request)
     {
         $version = isset($request['jsonrpc']) && $request['jsonrpc'] == '2.0';
@@ -43,32 +39,13 @@ trait Client
 
     protected function getRequest($method = null, $params = null)
     {
-        if (!$this->data) {
-            $this->data = [
-                'jsonrpc' => '2.0',
-                'method' => $menthod,
-                'params' => $params,
-                'id' => $this->newId()
-            ];
-        }
-        return $this->data;
+        return [
+            'jsonrpc' => '2.0',
+            'method' => $method,
+            'params' => $params,
+            'id' => $this->newId()
+        ];
     }
-
-    public function getMethod()
-    {
-        return $this->data['method'];
-    }
-
-    public function getRequestId()
-    {
-        return $this->data['id'];
-    }
-
-    public function getParams()
-    {
-        return isset($this->data['params']) ? $this->data['params'] : null;
-    }
-
 
     public function newId()
     {
