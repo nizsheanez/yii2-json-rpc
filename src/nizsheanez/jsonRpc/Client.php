@@ -6,7 +6,7 @@ namespace nizsheanez\jsonRpc;
  */
 class Client
 {
-    use \nizsheanez\jsonRpc\traits\Client;
+    use traits\Client;
 
     protected $url;
 

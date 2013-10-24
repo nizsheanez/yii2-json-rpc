@@ -7,10 +7,16 @@ trait Client
 {
     public function callServer($method, $params, $url)
     {
-        $request = $this->getRequest($method, $params);
+        $id = $this->newId();
+        $request = [
+            'jsonrpc' => '2.0',
+            'method' => $method,
+            'params' => $params,
+            'id' => $id
+        ];
+
         $ctx = $this->getHttpStreamContext($request);
         $jsonResponse = file_get_contents($url, false, $ctx);
-
 
         if ($jsonResponse === '') {
             throw new Exception('fopen failed', Exception::INTERNAL_ERROR);
@@ -56,16 +62,6 @@ trait Client
         $method = isset($request['method']);
         $id = isset($request['id']);
         return $version && $method && $id;
-    }
-
-    protected function getRequest($method = null, $params = null)
-    {
-        return [
-            'jsonrpc' => '2.0',
-            'method' => $method,
-            'params' => $params,
-            'id' => $this->newId()
-        ];
     }
 
     public function newId()

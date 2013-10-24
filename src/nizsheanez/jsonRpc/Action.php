@@ -12,7 +12,7 @@ use yii\web\HttpException;
  */
 class Action extends \yii\base\Action
 {
-    use \nizsheanez\jsonRpc\traits\Serializable;
+    use traits\Serializable;
 
     public function run()
     {
@@ -83,7 +83,7 @@ class Action extends \yii\base\Action
 
     protected function failIfNotAJsonRpcRequest()
     {
-        if (Yii::$app->request->requestType != 'POST' || Exception::checkContentType()) {
+        if (Yii::$app->request->requestType != 'POST' || $this->checkContentType()) {
             throw new HttpException(404, "Page not found");
         }
     }
