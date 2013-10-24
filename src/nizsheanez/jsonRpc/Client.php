@@ -16,8 +16,7 @@ class Client
 
     public function __call($name, $arguments)
     {
-        $ctx = Protocol::client($name, $arguments)->getHttpStreamContext();
-        $jsonResponse = file_get_contents($this->url, false, $ctx);
+        $jsonResponse = $this->callServer($name, $arguments, $this->url);
 
         if ($jsonResponse === '') {
             throw new Exception('fopen failed', Protocol::INTERNAL_ERROR);

@@ -12,6 +12,8 @@ use yii\web\HttpException;
  */
 class Action extends \yii\base\Action
 {
+    use \nizsheanez\jsonRpc\TraitServer;
+
     /**
      * @var Protocol
      */
@@ -21,9 +23,9 @@ class Action extends \yii\base\Action
     {
         $this->failIfNotAJsonRpcRequest();
         Yii::beginProfile('service.request');
-        $this->request = $output = null;
+        $output = null;
         try {
-            $this->protocol = Protocol::server(file_get_contents('php://input'));
+            $this->message = file_get_contents('php://input');
             try {
                 $output = $this->tryToRunMethod();
             } catch (Exception $e) {
@@ -31,9 +33,11 @@ class Action extends \yii\base\Action
                 throw new Exception($e->getMessage(), Protocol::INTERNAL_ERROR);
             }
 
-            echo $this->protocol->answer($output);
+            $this->result = $output;
+            echo serialize($this);
         } catch (Exception $e) {
-            echo $this->protocol->answer($output, $e);
+            $this->exception = $e;
+            echo serialize($this);
         }
         Yii::endProfile('service.request');
     }
