@@ -10,7 +10,7 @@ trait Client
     {
         $request = $this->getRequest($method, $params);
         $ctx = $this->getHttpStreamContext($request);
-        $jsonResponse = file_get_contents($this->url, false, $ctx);
+        $jsonResponse = file_get_contents($url, false, $ctx);
         return $jsonResponse;
     }
 
