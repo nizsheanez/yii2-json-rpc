@@ -13,10 +13,10 @@ trait Serializable
     {
         $request = json_decode($this->_requestMessage, true);
 
-        $answer = array(
+        $answer = [
             'jsonrpc' => '2.0',
             'id' => isset($request['id']) ? $request['id'] : $this->newId(),
-        );
+        ];
         if ($this->exception) {
             if ($this->exception instanceof Exception) {
                 $answer['error'] = $this->exception->getErrorAsArray();

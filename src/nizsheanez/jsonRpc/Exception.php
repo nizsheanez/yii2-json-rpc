@@ -23,11 +23,13 @@ class Exception extends \yii\base\Exception
 
     public function getErrorAsArray()
     {
-        $result = array(
+        $result = [
             'code' => $this->getCode(),
             'message' => $this->getMessage(),
-        );
-        if ($this->data !== null) $result['data'] = $this->data;
+        ];
+        if ($this->data !== null) {
+            $result['data'] = $this->data;
+        }
         return $result;
     }
 }
