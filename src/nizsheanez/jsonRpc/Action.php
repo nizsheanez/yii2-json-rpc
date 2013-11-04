@@ -5,6 +5,7 @@ use Yii;
 use ReflectionClass;
 use ReflectionMethod;
 use yii\web\HttpException;
+use nizsheanez\jsonRpc\Exception;
 
 
 /**
