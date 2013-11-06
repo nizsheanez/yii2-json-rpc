@@ -6,14 +6,19 @@
     "keywords": ["yii", "yii2", "json", "rpc", "jsonrpc"],
     "minimum-stability": "dev",
     "authors": [
-        {"name": "Alex Sharov", "email": "www.pismeco@gmail.com"}
+        {
+            "name": "Alex Sharov",
+            "email": "www.pismeco@gmail.com"
+        }
     ],
     "require": {
         "php": ">=5.4.0",
         "yiisoft/yii2": "dev-master"
     },
     "autoload": {
-        "psr-0": { "nizsheanez\\jsonRpc\\": "" }
+        "psr-0": {
+            "nizsheanez\\jsonRpc\\": ""
+        }
     },
     "target-dir": "nizsheanez/jsonRpc"
 }
