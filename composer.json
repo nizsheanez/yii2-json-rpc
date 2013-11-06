@@ -1,9 +1,10 @@
 {
     "name": "nizsheanez/yii2-json-rpc",
     "description": "A lightweight JsonRpc Server and Client for PHP",
-    "type": "library",
+    "type": "yii2-extension",
     "license": "BSD-3-Clause",
     "keywords": ["yii", "yii2", "json", "rpc", "jsonrpc"],
+    "minimum-stability": "dev",
     "authors": [
         {"name": "Alex Sharov", "email": "www.pismeco@gmail.com"}
     ],
@@ -12,6 +13,7 @@
         "yiisoft/yii2": "dev-master"
     },
     "autoload": {
-        "psr-0": { "nizsheanez": "src" }
-    }
+        "psr-0": { "nizsheanez\\jsonRpc\\": "" }
+    },
+    "target-dir": "nizsheanez/jsonRpc"
 }
