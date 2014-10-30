@@ -16,7 +16,7 @@
     },
     "autoload": {
         "psr-0": {
-            "nizsheanez\\jsonRpc\\": ""
+            "thefuzz69\\jsonRpc\\": ""
         }
     },
     "target-dir": "thefuzz69/jsonRpc"
