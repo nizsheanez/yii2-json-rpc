@@ -1,11 +1,11 @@
 <?
-namespace nizsheanez\jsonRpc;
+namespace thefuzz69\jsonRpc;
 
 use Yii;
 use ReflectionClass;
 use ReflectionMethod;
 use yii\web\HttpException;
-use nizsheanez\jsonRpc\Exception;
+use thefuzz69\jsonRpc\Exception;
 
 
 /**
