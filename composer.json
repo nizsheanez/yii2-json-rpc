@@ -1,5 +1,5 @@
 {
-    "name": "nizsheanez/yii2-json-rpc",
+    "name": "thefuzz69/yii2-json-rpc",
     "description": "A lightweight JsonRpc Server and Client for PHP",
     "type": "yii2-extension",
     "license": "BSD-3-Clause",
@@ -7,8 +7,7 @@
     "minimum-stability": "dev",
     "authors": [
         {
-            "name": "Alex Sharov",
-            "email": "www.pismeco@gmail.com"
+            "name": "Fuzz"
         }
     ],
     "require": {
@@ -20,5 +19,5 @@
             "nizsheanez\\jsonRpc\\": ""
         }
     },
-    "target-dir": "nizsheanez/jsonRpc"
+    "target-dir": "thefuzz69/jsonRpc"
 }
