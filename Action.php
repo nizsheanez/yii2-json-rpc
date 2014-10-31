@@ -83,9 +83,9 @@ class Action extends \yii\base\Action
 
     protected function failIfNotAJsonRpcRequest()
     {
-//        if (Yii::$app->request->isPost || $this->checkContentType()) {
-//            throw new HttpException(404, "Page not found");
-//        }
+        if (Yii::$app->request->isPost || $this->checkContentType()) {
+            throw new HttpException(404, "Page not found");
+        }
     }
 
 
