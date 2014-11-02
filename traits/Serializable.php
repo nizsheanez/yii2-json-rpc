@@ -9,7 +9,7 @@ trait Serializable
     use Request;
 
     public $exception;
-    public $result;
+    public $result = false;
 
     public function toJson()
     {
@@ -29,9 +29,10 @@ trait Serializable
                 ];
             }
         }
-        if ($this->result) {
+
+//        if ($this->result !== false) {
             $answer['result'] = $this->result;
-        }
+//        }
 
         if (self::isValidJsonRpc($answer)) {
             $answer['error'] = [
