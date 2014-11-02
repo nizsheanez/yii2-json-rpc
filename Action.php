@@ -22,18 +22,13 @@ class Action extends \yii\base\Action
         $output = null;
         try {
             $this->setRequestMessage(file_get_contents('php://input'));
-            try {
-                $output = $this->tryToRunMethod();
-            } catch (Exception $e) {
-                Yii::error($e, 'service.error');
-                throw new Exception($e->getMessage(), Exception::INTERNAL_ERROR);
-            }
-
-            $this->result = $output;
-            echo $this->toJson();
+            $this->result = $this->tryToRunMethod();
         } catch (Exception $e) {
-            echo $this->toJson();
+            Yii::error($e, 'service.error');
+            $this->exception = new Exception($e->getMessage(), Exception::INTERNAL_ERROR);
         }
+
+        echo $this->toJson();
         Yii::endProfile('service.request');
     }
 
@@ -67,23 +62,23 @@ class Action extends \yii\base\Action
     {
         $method = $this->getHandler();
 
-        ob_start();
+//        ob_start();
 
         Yii::beginProfile('service.request.action');
-        $this->runMethod($method, $this->getParams());
+        $output = $this->runMethod($method, $this->getParams());
         Yii::endProfile('service.request.action');
 
-        $output = ob_get_clean();
-        if ($output) {
+//        $output = ob_get_clean();
+//        if ($output) {
             Yii::info($output, 'service.output');
-        }
+//        }
 
         return $output;
     }
 
     protected function failIfNotAJsonRpcRequest()
     {
-        if (Yii::$app->request->isPost || $this->checkContentType()) {
+        if (!Yii::$app->request->isPost || !$this->checkContentType()) {
             throw new HttpException(404, "Page not found");
         }
     }
