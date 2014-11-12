@@ -70,7 +70,9 @@ class Action extends \yii\base\Action
 
 //        $output = ob_get_clean();
 //        if ($output) {
-            Yii::info($output, 'service.output');
+
+        Yii::info($method, 'service.output');
+        Yii::info($output, 'service.output');
 //        }
 
         return $output;
@@ -82,6 +84,4 @@ class Action extends \yii\base\Action
             throw new HttpException(404, "Page not found");
         }
     }
-
-
 }
