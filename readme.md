@@ -7,7 +7,7 @@ JsonRpc Server and Client for Yii2
 
 ~~~php
 "require": {
-    "nizsheanez/yii2-json-rpc": "1.*",
+    "thefuzz69/yii2-json-rpc": "*",
 },
 
 php composer.phar update
@@ -20,7 +20,7 @@ public function actions()
 {
     return array(
         'index' => array(
-            'class' => '\nizsheanez\JsonRpc\Action',
+            'class' => '\thefuzz69\JsonRpc\Action',
         ),
     );
 }
@@ -34,7 +34,7 @@ public function actions()
 ##Usage Client
 
 ~~~php
-$client = new \nizsheanez\JsonRpc\Client('http://url/of/webservice');
+$client = new \thefuzz69\JsonRpc\Client('http://url/of/webservice');
 
 $response = $client->someMethod($arg1, $arg2);
 ~~~
