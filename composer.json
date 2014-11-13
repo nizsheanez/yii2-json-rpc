@@ -1,6 +1,6 @@
 {
     "name": "thefuzz69/yii2-json-rpc",
-    "description": "A lightweight JsonRpc Server and Client for PHP",
+    "description": "A lightweight JsonRpc Server and Client for PHP (Fork of nizsheanez's yii2-json-rpc package)",
     "type": "yii2-extension",
     "license": "BSD-3-Clause",
     "keywords": ["yii", "yii2", "json", "rpc", "jsonrpc"],
