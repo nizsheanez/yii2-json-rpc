@@ -30,9 +30,7 @@ trait Serializable
             }
         }
 
-//        if ($this->result !== false) {
-            $answer['result'] = $this->result;
-//        }
+        $answer['result'] = $this->result;
 
         if (self::isValidJsonRpc($answer)) {
             $answer['error'] = [
@@ -42,11 +40,6 @@ trait Serializable
         }
 
         return json_encode($answer);
-    }
-
-    public function __toString()
-    {
-        return $this->toJson();
     }
 
     public function isSuccessResponse()

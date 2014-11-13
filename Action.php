@@ -9,7 +9,7 @@ use thefuzz69\jsonRpc\Exception;
 
 
 /**
- * @author alex.sharov
+ * @author alex.sharov, Konstantin Shuplenkov
  */
 class Action extends \yii\base\Action
 {
@@ -62,18 +62,12 @@ class Action extends \yii\base\Action
     {
         $method = $this->getHandler();
 
-//        ob_start();
-
         Yii::beginProfile('service.request.action');
-        $output = $this->runMethod($method, $this->getParams());
+        $output = $this->runMethod($method, $this->getParams($method));
         Yii::endProfile('service.request.action');
-
-//        $output = ob_get_clean();
-//        if ($output) {
 
         Yii::info($method, 'service.output');
         Yii::info($output, 'service.output');
-//        }
 
         return $output;
     }

@@ -5,6 +5,7 @@ use thefuzz69\jsonRpc\Exception;
 
 trait Request {
 
+    use Serializable;
     private $_requestMessage;
     private $_data;
 
@@ -14,19 +15,31 @@ trait Request {
         $this->_data = json_decode($message, true);
     }
 
-    public function getParams()
+    public function getParams($method)
     {
-        return $this->_data['params'];
+        $params = [];
+        $args = isset($this->_data['params']) ? $this->_data['params'] : [];
+        foreach($method->getParameters() as $param) {
+            /* @var $param ReflectionParameter */
+            if(isset($args[$param->getName()])) {
+                $params[] = $args[$param->getName()];
+            } elseif ($param->isDefaultValueAvailable()) {
+                $params[] = $param->getDefaultValue();
+            } else {
+                $params[] = null;
+            }
+        }
+
+        return $params;
     }
 
     public function getMethod()
     {
-        return $this->_data['method'];
+        return isset($this->_data['method']) ? $this->_data['method'] : null;
     }
 
     public function getRequestId()
     {
-        return $this->_data['id'];
+        return isset($this->_data['id']) ? $this->_data['id'] : $this->newId();
     }
-
 }
