@@ -7,9 +7,8 @@ use ReflectionMethod;
 use yii\web\HttpException;
 use nizsheanez\jsonRpc\Exception;
 
-
 /**
- * @author alex.sharov
+ * @author alex.sharov, Konstantin Shuplenkov
  */
 class Action extends \yii\base\Action
 {
@@ -22,22 +21,14 @@ class Action extends \yii\base\Action
         $output = null;
         try {
             $this->setRequestMessage(file_get_contents('php://input'));
-            try {
-                $output = $this->tryToRunMethod();
-            } catch (Exception $e) {
-                Yii::error($e, 'service.error');
-                throw new Exception($e->getMessage(), Exception::INTERNAL_ERROR);
-            }
-
-            $this->result = $output;
-            echo serialize($this);
+            $this->result = $this->tryToRunMethod();
         } catch (Exception $e) {
-            $this->exception = $e;
-            echo serialize($this);
+            Yii::error($e, 'service.error');
+            $this->exception = new Exception($e->getMessage(), Exception::INTERNAL_ERROR);
         }
+        echo $this->toJson();
         Yii::endProfile('service.request');
     }
-
 
     /**
      * @return string|callable|ReflectionMethod
@@ -45,10 +36,9 @@ class Action extends \yii\base\Action
     protected function getHandler()
     {
         $class = new ReflectionClass($this->controller);
-
-        if (!$class->hasMethod($this->getMethod()))
+        if (!$class->hasMethod($this->getMethod())) {
             throw new Exception("Method not found", Exception::METHOD_NOT_FOUND);
-
+        }
         $method = $class->getMethod($this->getMethod());
 
         return $method;
@@ -57,6 +47,7 @@ class Action extends \yii\base\Action
     /**
      * @param string|callable|\ReflectionMethod $method
      * @param array $params
+     *
      * @return mixed
      */
     protected function runMethod($method, $params)
@@ -67,27 +58,19 @@ class Action extends \yii\base\Action
     protected function tryToRunMethod()
     {
         $method = $this->getHandler();
-
-        ob_start();
-
         Yii::beginProfile('service.request.action');
-        $this->runMethod($method, $this->getParams());
+        $output = $this->runMethod($method, $this->getParams($method));
         Yii::endProfile('service.request.action');
-
-        $output = ob_get_clean();
-        if ($output) {
-            Yii::info($output, 'service.output');
-        }
+        Yii::info($method, 'service.output');
+        Yii::info($output, 'service.output');
 
         return $output;
     }
 
     protected function failIfNotAJsonRpcRequest()
     {
-        if (Yii::$app->request->isPost || $this->checkContentType()) {
+        if (!Yii::$app->request->isPost || !$this->checkContentType()) {
             throw new HttpException(404, "Page not found");
         }
     }
-
-
 }

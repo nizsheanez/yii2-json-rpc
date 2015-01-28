@@ -5,47 +5,36 @@ use nizsheanez\jsonRpc\Exception;
 
 trait Serializable
 {
-
     use Request;
-
     public $exception;
-    public $result;
+    public $result = false;
 
     public function toJson()
     {
         $request = json_decode($this->_requestMessage, true);
-
-        $answer = [
+        $answer  = [
             'jsonrpc' => '2.0',
-            'id' => isset($request['id']) ? $request['id'] : $this->newId(),
+            'id'      => isset($request['id']) ? $request['id'] : $this->newId(),
         ];
         if ($this->exception) {
             if ($this->exception instanceof Exception) {
                 $answer['error'] = $this->exception->getErrorAsArray();
             } else {
                 $answer['error'] = [
-                    'code' => Exception::INTERNAL_ERROR,
+                    'code'    => Exception::INTERNAL_ERROR,
                     'message' => $this->exception
                 ];
             }
         }
-        if ($this->result) {
-            $answer['result'] = $this->result;
-        }
-
+        $answer['result'] = $this->result;
         if (self::isValidJsonRpc($answer)) {
             $answer['error'] = [
-                'code' => Exception::INTERNAL_ERROR,
+                'code'    => Exception::INTERNAL_ERROR,
                 'message' => 'Internal error'
             ];
         }
 
         return json_encode($answer);
-    }
-
-    public function __toString()
-    {
-        return $this->toJson();
     }
 
     public function isSuccessResponse()
@@ -60,13 +49,14 @@ trait Serializable
 
     public static function isValidJsonRpc($response)
     {
-        $version = isset($response['jsonrpc']) && $response['jsonrpc'] == '2.0';
-        $method = isset($response['method']);
-        $data = isset($response['result']) || isset($response['error']);
+        $version    = isset($response['jsonrpc']) && $response['jsonrpc'] == '2.0';
+        $method     = isset($response['method']);
+        $data       = isset($response['result']) || isset($response['error']);
         $additional = true;
         if (isset($response['error'])) {
             $additional = isset($response['error']['code'], $response['error']['message']);
         }
+
         return $version && $method && $data && $additional;
     }
 
