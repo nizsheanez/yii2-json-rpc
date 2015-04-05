@@ -7,7 +7,8 @@ trait Client
 {
     public function callServer($method, $params, $url)
     {
-        $id = $this->newId();
+        #$id = $this->newId();
+        $id = 1;
         $request = [
             'jsonrpc' => '2.0',
             'method' => $method,
@@ -48,7 +49,7 @@ trait Client
         $ctx = stream_context_create([
             'http' => [
                 'method' => 'POST',
-                'header' => "Content-Type: " . Exception::MIME . "\r\n",
+                'header' => "Content-Type: application/json-rpc\r\n",
                 'content' => $jsonRequest
             ]
         ]);
