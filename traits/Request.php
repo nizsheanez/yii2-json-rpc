@@ -1,11 +1,9 @@
 <?php
-namespace nizsheanez\jsonRpc\traits;
 
-use nizsheanez\jsonRpc\Exception;
+namespace nizsheanez\jsonRpc\traits;
 
 trait Request
 {
-    use Serializable;
     private $_requestMessage;
     private $_data;
 
