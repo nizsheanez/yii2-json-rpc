@@ -1,11 +1,11 @@
 <?php
+
 namespace nizsheanez\jsonRpc\traits;
 
 use nizsheanez\jsonRpc\Exception;
 
 trait Serializable
 {
-    use Request;
     public $exception;
     public $result = false;
 
@@ -62,6 +62,6 @@ trait Serializable
 
     public static function checkContentType()
     {
-        return empty($_SERVER['CONTENT_TYPE']) || $_SERVER['CONTENT_TYPE'] != 'application/json-rpc';
+        return !empty($_SERVER['CONTENT_TYPE']) || $_SERVER['CONTENT_TYPE'] != 'application/json-rpc';
     }
 }

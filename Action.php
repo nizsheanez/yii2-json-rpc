@@ -1,11 +1,11 @@
 <?php
+
 namespace nizsheanez\jsonRpc;
 
-use Yii;
+use yii;
 use ReflectionClass;
 use ReflectionMethod;
 use yii\web\HttpException;
-use nizsheanez\jsonRpc\Exception;
 
 /**
  * @author alex.sharov, Konstantin Shuplenkov
@@ -13,6 +13,7 @@ use nizsheanez\jsonRpc\Exception;
 class Action extends \yii\base\Action
 {
     use traits\Serializable;
+    use traits\Request;
 
     public function run()
     {
@@ -55,6 +56,10 @@ class Action extends \yii\base\Action
         return $method->invokeArgs($this->controller, $params);
     }
 
+    /**
+     * @return mixed
+     * @throws Exception
+     */
     protected function tryToRunMethod()
     {
         $method = $this->getHandler();
@@ -67,6 +72,9 @@ class Action extends \yii\base\Action
         return $output;
     }
 
+    /**
+     * @throws HttpException
+     */
     protected function failIfNotAJsonRpcRequest()
     {
         if (!Yii::$app->request->isPost || !$this->checkContentType()) {
