@@ -27,8 +27,8 @@ class Action extends \yii\base\Action
             Yii::error($e, 'service.error');
             $this->exception = new Exception($e->getMessage(), Exception::INTERNAL_ERROR);
         }
-        echo $this->toJson();
         Yii::endProfile('service.request');
+        return $this->toJson();
     }
 
     /**
