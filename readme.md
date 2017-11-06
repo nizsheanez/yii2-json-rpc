@@ -20,7 +20,7 @@ public function actions()
 {
     return array(
         'index' => array(
-            'class' => '\nizsheanez\JsonRpc\Action',
+            'class' => \nizsheanez\jsonRpc\Action::class,
         ),
     );
 }
