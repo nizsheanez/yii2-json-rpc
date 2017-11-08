@@ -28,6 +28,9 @@ class Action extends \yii\base\Action
             $this->exception = new Exception($e->getMessage(), Exception::INTERNAL_ERROR);
         }
         Yii::endProfile('service.request');
+        
+        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        
         return $this->toJson();
     }
 
