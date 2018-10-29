@@ -29,7 +29,7 @@ class Action extends \yii\base\Action
         }
         Yii::endProfile('service.request');
         
-        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        //Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         
         return $this->toJson();
     }
