@@ -17,6 +17,9 @@ trait Request
     {
         $params = [];
         $args   = isset($this->_data['params']) ? $this->_data['params'] : [];
+
+        if(isset($args[0]) && is_array($args[0])) $args = $args[0];
+
         foreach ($method->getParameters() as $param) {
             /* @var $param ReflectionParameter */
             if (isset($args[$param->getName()])) {
